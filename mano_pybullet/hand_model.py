@@ -19,14 +19,16 @@ class HandModel(ManoModel):
     from the joint space to the MANO model pose.
     """
 
-    def __init__(self, left_hand=False, models_dir=None):
+    def __init__(self, left_hand=False, models_dir=None, betas=None):
         """Initialize a HandModel.
 
         Keyword Arguments:
             left_hand {bool} -- create a left hand model (default: {False})
             models_dir {str} -- path to the pickled model files (default: {None})
+            betas {array} -- MANO shape beta parameters  (default: {None})
         """
         super().__init__(left_hand=left_hand, models_dir=models_dir)
+        self._betas = betas
         self._joints = self._make_joints()
         self._basis = [joint.basis for joint in self._joints]
         self._axes = [joint.axes for joint in self._joints]
@@ -128,7 +130,7 @@ class HandModel20(HandModel):
         Returns:
             list -- list of joints parameters
         """
-        origin = dict(zip(self.link_names, self.origins()))
+        origin = dict(zip(self.link_names, self.origins(betas=self._betas)))
         basis = {'palm': np.eye(3)}
 
         def make_basis(yvec, zvec):
@@ -192,7 +194,7 @@ class HandModel45(HandModel):
         Returns:
             list -- list of joints parameters
         """
-        origin = dict(zip(self.link_names, self.origins()))
+        origin = dict(zip(self.link_names, self.origins(betas=self._betas)))
         limits = [(-np.pi, np.pi), (-np.pi/2, np.pi/2), (-np.pi, np.pi)]
 
         return [
